@@ -17,7 +17,7 @@ class Particle():
         self.color = color
         self.mass = mass
         self.density = 0
-        self.max_speed = 100
+        self.max_speed = 12000
         Particle.particles.append(self)
         Particle.densities.append(self.density)
 
@@ -43,8 +43,8 @@ class Particle():
 
         # Define color anchors
         c0 = (23, 157, 170)  # 0 m/s
-        c1 = (198, 241, 83)  # mid
-        c2 = (252, 70, 4)  # max
+        c1 = (53, 187, 200) #(198, 241, 83)  # mid
+        c2 = (255, 255, 255) #(252, 70, 4)  # max
 
         if t <= 0.5:
             # interpolate between c0 and c1
@@ -117,8 +117,8 @@ class Particle():
 
     @staticmethod
     def convert_density_to_pressure(density):
-        targetDensity = 15
-        pressureMultiplier = 4
+        targetDensity = 50
+        pressureMultiplier = 2.5 * (Particle.particles[0].radius**2)
 
         densityError = density - targetDensity
         pressure = densityError * pressureMultiplier
@@ -163,14 +163,16 @@ class Particle():
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((1000, 700))
+    screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE, pygame.SRCALPHA)
     clock = pygame.time.Clock()
     running = True
     dt = 1
-    r = 15
+    r = 10
+    translucence = 255
+    overlay_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+    overlay_surface.fill((0, 0, 0, translucence))
     ptcl_color = "WHITE"
-    bg_color = "BLACK"
-    num_particles = 40
+    num_particles = 30
     font = pygame.font.SysFont("Arial", 20)
     forces = [pygame.Vector2(0, 9.8*30)]
     net_ext_force = pygame.Vector2(0, 0)
@@ -193,12 +195,18 @@ def main():
                     forces[0] = pygame.Vector2(-9.8*60, 0)
                 elif event.key == pygame.K_RIGHT:
                     forces[0] = pygame.Vector2(9.8*60, 0)
+                elif event.key == pygame.K_w:
+                    translucence += 15 if translucence < 255 else 0
+                elif event.key == pygame.K_s:
+                    translucence -= 15 if translucence > 0 else 0
 
         net_ext_force = forces[0]
 
         dt = clock.tick(60) / 1000
-
-        screen.fill(bg_color)
+        
+        overlay_surface = pygame.Surface((screen.get_width(), screen.get_height()), pygame.SRCALPHA)
+        overlay_surface.fill((0, 0, 0, translucence))
+        screen.blit(overlay_surface, (0, 0))
 
         for particle in Particle.particles:
             t1 = threading.Thread(target=particle.update, args=(screen, net_ext_force, dt))
@@ -208,7 +216,7 @@ def main():
         for particle in Particle.particles:
             pygame.draw.circle(screen, particle.color, particle.pos, particle.radius)
 
-        text_surface = font.render(f"FPS: {(1 / dt):.0f}", True, (255, 255, 255))
+        text_surface = font.render(f"FPS: {(1 / dt):.0f}  T {translucence}", True, (255, 255, 255))
         screen.blit(text_surface, (10, 10))
 
         pygame.display.flip()
