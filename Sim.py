@@ -17,7 +17,7 @@ class Particle():
         self.color = color
         self.mass = mass
         self.density = 0
-        self.max_speed = 100
+        self.max_speed = 400
         Particle.particles.append(self)
         Particle.densities.append(self.density)
 
@@ -43,8 +43,8 @@ class Particle():
 
         # Define color anchors
         c0 = (23, 157, 170)  # 0 m/s
-        c1 = (198, 241, 83)  # mid
-        c2 = (252, 70, 4)  # max
+        c1 = (53, 187, 200)  # mid
+        c2 = (255, 255, 255)  # max
 
         if t <= 0.5:
             # interpolate between c0 and c1
@@ -117,7 +117,7 @@ class Particle():
 
     @staticmethod
     def convert_density_to_pressure(density):
-        targetDensity = 15
+        targetDensity = 20
         pressureMultiplier = 4
 
         densityError = density - targetDensity
@@ -163,16 +163,16 @@ class Particle():
 
 def main():
     pygame.init()
-    screen = pygame.display.set_mode((1000, 700))
+    screen = pygame.display.set_mode((1000, 700), pygame.RESIZABLE)
     clock = pygame.time.Clock()
     running = True
     dt = 1
-    r = 15
+    r = 20
     ptcl_color = "WHITE"
     bg_color = "BLACK"
-    num_particles = 40
+    num_particles = 20
     font = pygame.font.SysFont("Arial", 20)
-    forces = [pygame.Vector2(0, 9.8*30)]
+    forces = [pygame.Vector2(0, 9.8*60)]
     net_ext_force = pygame.Vector2(0, 0)
 
     for i in range(num_particles):
